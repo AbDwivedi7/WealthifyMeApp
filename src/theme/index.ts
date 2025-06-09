@@ -1,20 +1,33 @@
 import type { Theme } from '@react-navigation/native';
 
+export const colors = {
+  primary: '#6C47FF',
+  secondary: '#007AFF',
+  background: '#fff',
+  text: '#222',
+  buttonTextPrimary: '#fff',
+  buttonTextSecondary: '#fff',
+  border: '#e0e0e0',
+  card: '#fff',
+  notification: '#007AFF',
+  disabled: '#bbb',
+};
+
 export const theme = {
   colors: {
-    background: '#fff',
-    primary: '#007AFF',
-    text: '#222',
+    background: colors.background,
+    primary: colors.primary,
+    text: colors.text,
   },
   navigation: {
     dark: false,
     colors: {
-      background: '#fff',
-      card: '#fff',
-      text: '#222',
-      border: '#ccc',
-      notification: '#007AFF',
-      primary: '#007AFF',
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.notification,
+      primary: colors.primary,
     },
     fonts: {
       regular: { fontFamily: 'System', fontWeight: '400' },

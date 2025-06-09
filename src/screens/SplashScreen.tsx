@@ -1,17 +1,17 @@
 import React from 'react';
-import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native';
+import { colors } from '@/theme';
 
 const SplashScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/logo.png')}
+      <LottieView
+        source={require('../assets/logo.json')}
+        autoPlay
+        loop
         style={styles.logo}
-        resizeMode="contain"
-        onError={() => {}}
       />
-      <Text style={styles.title}>WealthifyMe</Text>
-      <ActivityIndicator size="large" color="#007AFF" style={styles.spinner} />
     </View>
   );
 };
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   logo: {
     width: 120,

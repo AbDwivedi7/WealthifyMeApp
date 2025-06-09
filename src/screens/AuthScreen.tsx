@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { sendOtp, verifyOtp, createProfile } from '../services/api/auth';
 import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
 import type { AppDispatch } from '../store';
+import { colors } from '@/theme';
 
 const AuthScreen: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -13,13 +14,20 @@ const AuthScreen: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
+  const [resendDisabled, setResendDisabled] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
   const handleSendOtp = async () => {
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
     try {
       await sendOtp(mobileNumber);
       Alert.alert('OTP Sent', 'Please check your mobile for the OTP.');
       setStep(2);
+      setResendDisabled(true);
+      setTimeout(() => setResendDisabled(false), 30000); // 30s cooldown
     } catch (error) {
       Alert.alert('Error', 'Failed to send OTP. Please try again.');
     }
@@ -50,65 +58,141 @@ const AuthScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {step === 1 && (
-        <View>
-          <Text style={styles.title}>Enter Mobile Number</Text>
-          <Input
-            placeholder="Mobile Number"
-            value={mobileNumber}
-            onChangeText={setMobileNumber}
-            keyboardType="phone-pad"
-          />
-          <Button title="Send OTP" onPress={handleSendOtp} />
-        </View>
-      )}
-
-      {step === 2 && (
-        <View>
-          <Text style={styles.title}>Enter OTP</Text>
-          <Input
-            placeholder="OTP"
-            value={otp}
-            onChangeText={setOtp}
-            keyboardType="number-pad"
-          />
-          <Button title="Verify OTP" onPress={handleVerifyOtp} />
-        </View>
-      )}
-
-      {step === 3 && (
-        <View>
-          <Text style={styles.title}>Create Profile</Text>
-          <Input
-            placeholder="Name"
-            value={name}
-            onChangeText={setName}
-          />
-          <Input
-            placeholder="Gender"
-            value={gender}
-            onChangeText={setGender}
-          />
-          <Button title="Create Profile" onPress={handleCreateProfile} />
-          <Button title="Login" onPress={handleLogin} />
-        </View>
-      )}
+    <View style={styles.screen}>
+      <View style={styles.card}>
+        {step === 1 && (
+          <>
+            <Text style={styles.title}>Verification</Text>
+            <Text style={styles.subtitle}>
+              We will send you a <Text style={styles.bold}>One Time Password</Text> on your phone number
+            </Text>
+            <Input
+              placeholder="Enter Phone Number"
+              value={mobileNumber}
+              onChangeText={setMobileNumber}
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
+            <Button title="GET OTP" onPress={handleSendOtp} disabled={!/^\d{10}$/.test(mobileNumber)} />
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <Text style={styles.title}>Verification</Text>
+            <Text style={styles.subtitle}>
+              You will get a OTP via <Text style={styles.bold}>SMS</Text>
+            </Text>
+            <Input
+              placeholder="••••"
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              style={styles.input}
+              secureTextEntry
+              maxLength={6}
+            />
+            <Button title="VERIFY" onPress={handleVerifyOtp} />
+            <Text style={styles.resendText}>
+              Didn't receive the verification OTP?{' '}
+              <TouchableOpacity disabled={resendDisabled} onPress={handleSendOtp}>
+                <Text style={[styles.resendLink, resendDisabled && styles.resendDisabled]}>Resend again</Text>
+              </TouchableOpacity>
+            </Text>
+          </>
+        )}
+        {step === 3 && (
+          <>
+            <Text style={styles.title}>Create Profile</Text>
+            <Input
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+            />
+            <Input
+              placeholder="Gender"
+              value={gender}
+              onChangeText={setGender}
+              style={styles.input}
+            />
+            <Button title="Create Profile" onPress={handleCreateProfile} />
+            <Button title="Login" onPress={handleLogin} />
+          </>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    backgroundColor: colors.background,
+  },
+  card: {
+    width: '90%',
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 28,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 8,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.secondary,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  bold: {
+    fontWeight: 'bold',
+    color: colors.primary,
+  },
+  input: {
+    width: 260,
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    marginBottom: 18,
+    backgroundColor: colors.background,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  button: {
+    width: 260,
+    height: 48,
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resendText: {
+    fontSize: 13,
+    color: colors.secondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  resendLink: {
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  resendDisabled: {
+    color: colors.disabled,
   },
 });
 

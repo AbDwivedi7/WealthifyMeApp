@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
@@ -19,12 +19,20 @@ const AppNavigator: React.FC = () => {
   console.log('AppNavigator loaded');
   const dispatch = useDispatch<AppDispatch>();
   const { loading, isAuthenticated } = useSelector((state: any) => state.auth);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     dispatch(checkAuth());
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => setShowSplash(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+  if (loading || showSplash) {
     return <SplashScreen />;
   }
 
